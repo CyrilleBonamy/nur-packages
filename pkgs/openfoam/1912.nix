@@ -21,6 +21,7 @@ stdenv.mkDerivation rec {
     substituteInPlace etc/bashrc --replace '[ -n "''$projectDir=' '# [ -n "*$projectDir='
     sed -ie 's|PROJECT_DIR=.*|PROJECT_DIR="'"$out"/OpenFOAM-v${version}'"|' etc/bashrc
     sed -ie 's|\[ -n "$projectDir|#\[ -n "$projectDir|' etc/bashrc
+    sed -ie 's|\/bin\/cat|cat|' wmake/scripts/have_adios2
     sed -ie 's|BOOST_ARCH_PATH=.*$|BOOST_ARCH_PATH=${boost}|' etc/config.sh/CGAL
     sed -ie 's|$GMP_ARCH_PATH|${gmp}|' etc/config.sh/CGAL
     sed -ie 's|$MPFR_ARCH_PATH|${mpfr}|' etc/config.sh/CGAL
