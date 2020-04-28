@@ -1,0 +1,151 @@
+--- OpenFOAM-v1912.orig/applications/utilities/mesh/generation/foamyMesh/foamyQuadMesh/CV2D.H	2019-12-23 10:49:24.000000000 +0100
++++ OpenFOAM-v1912/applications/utilities/mesh/generation/foamyMesh/foamyQuadMesh/CV2D.H	2020-04-23 00:28:30.348068000 +0200
+@@ -1,12 +1,10 @@
+ /*---------------------------------------------------------------------------*\
+   =========                 |
+   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+-   \\    /   O peration     |
+-    \\  /    A nd           | www.openfoam.com
++   \\    /   O peration     | Website:  https://openfoam.org
++    \\  /    A nd           | Copyright (C) 2013-2019 OpenFOAM Foundation
+      \\/     M anipulation  |
+ -------------------------------------------------------------------------------
+-    Copyright (C) 2013-2016 OpenFOAM Foundation
+--------------------------------------------------------------------------------
+ License
+     This file is part of OpenFOAM.
+ 
+@@ -35,10 +33,10 @@
+ 
+     // Min cell size used in tolerances when inserting points for
+     // boundary conforming.
+-    // Also used to as the grid spacing using in insertGrid.
++    // Also used to as the grid spacing usind in insertGrid.
+     minCellSize  0.05;
+ 
+-    // Feature angle used to insert feature points
++    // Feature angle used to inser feature points
+     // 0 = all features, 180 = no features
+     featureAngle 45;
+ 
+@@ -124,8 +122,8 @@
+ #include "point2DFieldFwd.H"
+ #include "dictionary.H"
+ #include "Switch.H"
+-#include "bitSet.H"
+-#include "edgeHashes.H"
++#include "PackedBoolList.H"
++#include "EdgeMap.H"
+ #include "cv2DControls.H"
+ #include "tolerances.H"
+ #include "meshTools.H"
+@@ -148,10 +146,10 @@
+ :
+     public Delaunay
+ {
++    //- Use the Foam::point in preference to the CGAL point
++    typedef Foam::point point;
+ 
+-private:
+-
+-    // Private data
++    // Private Data
+ 
+         //- The time registry of the application
+         const Time& runTime_;
+@@ -159,7 +157,7 @@
+         mutable Random rndGen_;
+ 
+         //- The surface to mesh
+-        //const querySurface& qSurf_;
++        // const querySurface& qSurf_;
+         //- All geometry of the meshing process, including surfaces to be
+         //  conformed to and those to be used for refinement
+         searchableSurfaces allGeometry_;
+@@ -201,13 +199,6 @@
+ 
+     // Private Member Functions
+ 
+-        //- No copy construct
+-        CV2D(const CV2D&) = delete;
+-
+-        //- No copy assignment
+-        void operator=(const CV2D&) = delete;
+-
+-
+         //- Insert point and return it's index
+         inline label insertPoint
+         (
+@@ -270,7 +261,7 @@
+         );
+ 
+         //- Check to see if dual cell specified by given vertex iterator
+-        //  intersects the boundary and hence requires a point-pair.
++        //  intersects the boundary and hence reqires a point-pair.
+         bool dualCellSurfaceIntersection
+         (
+             const Triangulation::Finite_vertices_iterator& vit
+@@ -335,6 +326,9 @@
+         //- Construct for given surface
+         CV2D(const Time& runTime, const dictionary& controlDict);
+ 
++        //- Disallow default bitwise copy construction
++        CV2D(const CV2D&) = delete;
++
+ 
+     //- Destructor
+     ~CV2D();
+@@ -349,9 +343,9 @@
+ 
+         // Conversion functions between point2D, point and Point
+ 
+-            inline const point2D& toPoint2D(const Foam::point&) const;
++            inline const point2D& toPoint2D(const point&) const;
+             inline const point2DField toPoint2D(const pointField&) const;
+-            inline Foam::point toPoint3D(const point2D&) const;
++            inline point toPoint3D(const point2D&) const;
+ 
+             #ifdef CGAL_INEXACT
+                 typedef const point2D& point2DFromPoint;
+@@ -363,7 +357,7 @@
+ 
+             inline point2DFromPoint toPoint2D(const Point&) const;
+             inline PointFromPoint2D toPoint(const point2D&) const;
+-            inline Foam::point toPoint3D(const Point&) const;
++            inline point toPoint3D(const Point&) const;
+ 
+ 
+         // Point insertion
+@@ -453,6 +447,12 @@
+             void writePatch(const fileName& fName) const;
+ 
+             void write() const;
++
++
++    // Member Operators
++
++        //- Disallow default bitwise assignment
++        void operator=(const CV2D&) = delete;
+ };
+ 
+ 
+--- OpenFOAM-v1912.orig/applications/utilities/surface/surfaceBooleanFeatures/surfaceBooleanFeatures.C	2019-12-23 10:49:24.000000000 +0100
++++ OpenFOAM-v1912/applications/utilities/surface/surfaceBooleanFeatures/surfaceBooleanFeatures.C	2020-04-23 15:25:25.000000000 +0200
+@@ -652,7 +652,7 @@
+                     CGAL::to_double(ptPtr->z())
+                 );
+ 
+-                Polyhedron::Face_handle f = (*iter)->second;
++                Polyhedron::Face_handle f = ((*iter)->second).first;
+ 
+                 intersections[edgeI].append
+                 (
+@@ -676,7 +676,7 @@
+                 //    << "intersection object is a segment:" << sPtr->source()
+                 //    << " " << sPtr->target() << std::endl;
+ 
+-                Polyhedron::Face_handle f = (*iter)->second;
++                Polyhedron::Face_handle f = ((*iter)->second).first;
+                 //std::cout<< "triangle:" << f->index
+                 //    << " region:" << f->region << std::endl;
+ 

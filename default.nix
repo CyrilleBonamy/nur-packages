@@ -22,6 +22,9 @@ rec {
   intel-compilers-2018 = pkgs.callPackage ./pkgs/intel/2018.nix { };
   intel-compilers-2019 = pkgs.callPackage ./pkgs/intel/2019.nix { };
 
+  # Openfoam
+  openfoam1912 = pkgs.callPackage ./pkgs/openfoam/1912.nix { };
+
   # Openmpi
   openmpi1 = pkgs.callPackage ./pkgs/openmpi { };
   openmpi2 = pkgs.callPackage ./pkgs/openmpi/2.nix { psm2 = psm2; libfabric = libfabric;};
